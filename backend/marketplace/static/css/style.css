@@ -334,3 +334,86 @@ footer .text-muted {
   color: #cbd5e1 !important;
 }
 
+/* ==========================================
+   Responsive Enhancements (Mobile & Tablet)
+   ========================================== */
+@media (max-width: 991.98px) {
+  .hero-section {
+    padding: 2.5rem 0 3.5rem 0;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .main-gallery-img {
+    height: 350px;
+  }
+
+  .filter-bar {
+    margin-top: -1rem;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hero-section h1 {
+    font-size: 2.1rem !important;
+    line-height: 1.2;
+  }
+
+  .hero-section .lead {
+    font-size: 1rem !important;
+  }
+
+  .card-body-content {
+    padding: 0.9rem;
+  }
+
+  .card-body-content h6 {
+    font-size: 0.95rem;
+  }
+
+  .main-gallery-img {
+    height: 280px;
+  }
+
+  .thumb-img {
+    width: 65px;
+    height: 65px;
+  }
+
+  /* Mobile Nav Dropdown readability */
+  .rewear-navbar .dropdown-menu {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .rewear-navbar .dropdown-item {
+    color: #e2e8f0 !important;
+  }
+
+  .rewear-navbar .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-section form {
+    flex-direction: column;
+    border-radius: 16px !important;
+    gap: 0.5rem;
+  }
+
+  .hero-section form input {
+    border-radius: 12px !important;
+  }
+
+  .hero-section form button {
+    border-radius: 12px !important;
+    width: 100%;
+  }
+
+  .thumb-grid {
+    gap: 0.5rem;
+  }
+}
+
+
