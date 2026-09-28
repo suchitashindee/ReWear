@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ listing.title }} | ReWear Circular Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'catalog' %}" class="text-decoration-none text-muted">Catalog</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'catalog' %}?category={{ listing.category }}" class="text-decoration-none text-muted">{{ listing.get_category_display }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ listing.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Left Column: Multi-Photo Gallery -->
+        <div class="col-lg-6">
+            <div class="bg-white p-3 rounded-4 shadow-sm border">
+                <!-- Main Featured Photo -->
+                <div class="position-relative">
+                    {% if listing.primary_image_url %}
+                        <img id="mainGalleryImage" src="{{ listing.primary_image_url }}" alt="{{ listing.title }}" class="main-gallery-img">
+                    {% else %}
+                        <div class="main-gallery-img d-flex align-items-center justify-content-center bg-light text-muted">
+                            <i class="bi bi-image fs-1"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <span class="position-absolute top-0 start-0 m-3 badge-transaction {% if listing.listing_type == 'sell' %}badge-sell{% elif listing.listing_type == 'rent' %}badge-rent{% elif listing.listing_type == 'resell' %}badge-resell{% else %}badge-swap{% endif %}">
+                        {{ listing.get_listing_type_display }}
+                    </span>
+                </div>
+
+                <!-- Multiple Photo Thumbnails Grid -->
+                {% if listing.all_images %}
+                    <div class="thumb-grid mt-3">
+                        {% for img in listing.all_images %}
+                            <img src="{% if img.url %}{{ img.url }}{% else %}{{ img }}{% endif %}" 
+                                 class="thumb-img {% if forloop.first %}active{% endif %}" 
+                                 alt="Garment view {{ forloop.counter }}" 
+                                 onclick="switchGalleryPhoto(this.src, this)">
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right Column: Garment Details & AI Eco Impact -->
+        <div class="col-lg-6">
+            <div class="bg-white p-4 rounded-4 shadow-sm border h-100 d-flex flex-direction-column justify-content-between">
+                <div>
+                    <!-- Brand & Category -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-success fw-bold text-uppercase small" style="color:#059669;">
+                            <i class="bi bi-patch-check-fill me-1"></i> {{ listing.brand|default:"Thrifted / Pre-loved" }}
+                        </span>
+                        <span class="badge-eco-grade fs-6">Grade: {{ listing.sustainability_grade }}</span>
+                    </div>
+
+                    <h2 class="fw-bold mb-3 text-dark">{{ listing.title }}</h2>
+
+                    <!-- Price Box -->
+                    <div class="p-3 rounded-3 mb-4" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                        <div class="d-flex align-items-baseline justify-content-between">
+                            <div>
+                                {% if listing.listing_type == 'rent' %}
+                                    <h3 class="fw-bold mb-0 text-dark">₹{{ listing.rental_price_per_day }}<small class="fs-6 text-muted"> / day</small></h3>
+                                    {% if listing.security_deposit %}
+                                        <small class="text-muted d-block mt-1"><i class="bi bi-shield-lock me-1"></i> Refundable Security Deposit: ₹{{ listing.security_deposit }}</small>
+                                    {% endif %}
+                                {% elif listing.listing_type == 'swap' %}
+                                    <h3 class="fw-bold mb-0 text-success"><i class="bi bi-arrow-left-right me-2"></i> Free Garment Swap</h3>
+                                    {% if listing.swap_preferences %}
+                                        <small class="text-dark d-block mt-1"><strong>Seller wants:</strong> {{ listing.swap_preferences }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <h3 class="fw-bold mb-0 text-dark">₹{{ listing.sale_price }}</h3>
+                                    {% if listing.original_price %}
+                                        <small class="text-muted text-decoration-line-through me-2">Retail: ₹{{ listing.original_price }}</small>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-light text-dark border"><i class="bi bi-eye me-1"></i> {{ listing.views_count }} views</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Eco-Impact Breakdown Widget -->
+                    <div class="ai-assistant-card">
+                        <h5><i class="bi bi-robot"></i> AI Sustainability Impact Report</h5>
+                        <p class="small text-muted mb-3">Choosing this pre-loved garment diverts fast-fashion waste and conserves global resources:</p>
+                        <div class="row g-2 text-center">
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded border">
+                                    <div class="fw-bold text-success">{{ listing.co2_saved_kg }} kg</div>
+                                    <small class="text-muted" style="font-size:0.7rem;">CO₂ Saved</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded border">
+                                    <div class="fw-bold text-primary">{{ listing.water_saved_liters|floatformat:0 }} L</div>
+                                    <small class="text-muted" style="font-size:0.7rem;">Water Saved</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-white p-2 rounded border">
+                                    <div class="fw-bold text-dark">{{ listing.waste_diverted_g }} g</div>
+                                    <small class="text-muted" style="font-size:0.7rem;">Waste Saved</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Specifications List -->
+                    <h5 class="fw-bold mt-4 mb-2">Item Specifications</h5>
+                    <div class="row g-2 mb-3 small">
+                        <div class="col-6"><strong>Category:</strong> {{ listing.get_category_display }}</div>
+                        <div class="col-6"><strong>Size:</strong> {{ listing.size }}</div>
+                        <div class="col-6"><strong>Condition:</strong> {{ listing.get_condition_display }}</div>
+                        <div class="col-6"><strong>Listing Type:</strong> {{ listing.get_listing_type_display }}</div>
+                    </div>
+
+                    <!-- Description -->
+                    <h5 class="fw-bold mt-3 mb-2">Garment History & Details</h5>
+                    <p class="text-muted small mb-4">{{ listing.description|linebreaksbr }}</p>
+
+                    {% if listing.condition_details %}
+                        <div class="alert alert-light border small">
+                            <strong><i class="bi bi-info-circle me-1"></i> Seller Condition Note:</strong> {{ listing.condition_details }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Button & Seller Card -->
+                <div>
+                    {% if listing.is_available %}
+                        <a href="{% url 'add_to_cart' listing.id %}" class="btn btn-rewear-primary btn-lg w-100 rounded-pill mb-3">
+                            <i class="bi bi-cart-plus me-2"></i> Add to Circular Cart
+                        </a>
+                    {% else %}
+                        <button disabled class="btn btn-secondary btn-lg w-100 rounded-pill mb-3">
+                            Item Sold / Rented Out
+                        </button>
+                    {% endif %}
+
+                    <!-- Seller Card -->
+                    <div class="d-flex align-items-center p-3 rounded-3 border bg-light">
+                        <div class="me-3">
+                            <i class="bi bi-person-circle fs-1 text-emerald" style="color:#059669;"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Listed by {{ listing.seller.first_name|default:listing.seller.username }}</h6>
+                            <small class="text-muted">Eco Points: <strong>{{ seller_profile.sustainability_points }}</strong> • Level: <strong>{{ seller_profile.eco_level }}</strong></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchGalleryPhoto(src, element) {
+    document.getElementById('mainGalleryImage').src = src;
+    document.querySelectorAll('.thumb-img').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+}
+</script>
+{% endblock %}

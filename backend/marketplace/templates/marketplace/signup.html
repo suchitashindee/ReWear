@@ -1,0 +1,12 @@
+<h1>Create your ReWear account</h1>
+<p>Buy, sell, rent, and swap fashion with one account.</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ user_form.as_p }}
+    {{ profile_form.as_p }}
+
+    <button type="submit">Create account</button>
+</form>
+
+<p>Already have an account? <a href="{% url 'login' %}">Log in</a></p>

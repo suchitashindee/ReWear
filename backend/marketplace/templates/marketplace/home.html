@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center text-md-start">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge bg-emerald text-white px-3 py-2 rounded-pill mb-3" style="background:#059669;">
+                    <i class="bi bi-sparkles me-1"></i> AI-Powered Circular Fashion Platform
+                </span>
+                <h1 class="display-4 fw-extrabold mb-3 text-white">
+                    Wear, Share, Swap & Repeat.
+                </h1>
+                <p class="lead text-slate-300 mb-4" style="color:#cbd5e1;">
+                    Extend the lifecycle of pre-loved clothing. Buy curated vintage, rent luxury wear, resell archive pieces, or swap directly with fashion lovers.
+                </p>
+
+                <!-- Search Bar -->
+                <form action="{% url 'catalog' %}" method="GET" class="d-flex bg-white p-2 rounded-pill shadow-lg max-w-xl">
+                    <input type="text" name="q" class="form-control border-0 rounded-pill px-4" placeholder="Search jackets, Zara dresses, vintage denim..." aria-label="Search">
+                    <button type="submit" class="btn btn-rewear-primary rounded-pill px-4">
+                        <i class="bi bi-search me-1"></i> Search
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Hero Stats Box -->
+            <div class="col-lg-5">
+                <div class="p-4 rounded-4 shadow-lg border" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(16px); border-color: rgba(255,255,255,0.15) !important;">
+                    <h5 class="text-emerald mb-3" style="color:#10b981;"><i class="bi bi-globe-americas me-2"></i> Circular Impact Counter</h5>
+                    <div class="row g-3 text-center">
+                        <div class="col-4">
+                            <div class="p-2 rounded-3 bg-dark">
+                                <h4 class="fw-bold mb-0 text-white">{{ co2_total }}kg</h4>
+                                <small class="text-muted" style="font-size:0.75rem;">CO₂ Saved</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded-3 bg-dark">
+                                <h4 class="fw-bold mb-0 text-white">{{ water_total|floatformat:0 }}L</h4>
+                                <small class="text-muted" style="font-size:0.75rem;">Water Saved</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 rounded-3 bg-dark">
+                                <h4 class="fw-bold mb-0 text-white">{{ waste_total }}kg</h4>
+                                <small class="text-muted" style="font-size:0.75rem;">Waste Diverted</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Pills & Filter Bar -->
+<div class="container mb-5">
+    <div class="filter-bar">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <span class="fw-bold text-dark"><i class="bi bi-sliders me-1"></i> Quick Browse:</span>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{% url 'catalog' %}" class="btn btn-rewear-outline btn-sm rounded-pill">All Items</a>
+                <a href="{% url 'catalog' %}?type=sell" class="btn btn-rewear-outline btn-sm rounded-pill"><i class="bi bi-tag-fill me-1"></i> Buy & Sell</a>
+                <a href="{% url 'catalog' %}?type=rent" class="btn btn-rewear-outline btn-sm rounded-pill"><i class="bi bi-calendar-event me-1"></i> Rent</a>
+                <a href="{% url 'catalog' %}?type=resell" class="btn btn-rewear-outline btn-sm rounded-pill"><i class="bi bi-arrow-repeat me-1"></i> Resell</a>
+                <a href="{% url 'catalog' %}?type=swap" class="btn btn-rewear-outline btn-sm rounded-pill"><i class="bi bi-arrow-left-right me-1"></i> Swap</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Listings Section -->
+<section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <span class="text-success fw-bold text-uppercase small" style="color:#059669;">Explore Circular Closet</span>
+            <h2 class="mb-0">Fresh Pre-Loved Garments</h2>
+        </div>
+        <a href="{% url 'catalog' %}" class="btn btn-link text-success fw-bold text-decoration-none">View All Listings &rarr;</a>
+    </div>
+
+    <div class="row g-4">
+        {% for listing in listings %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="rewear-card">
+                    <!-- Image Wrapper -->
+                    <div class="card-img-wrapper">
+                        {% if listing.primary_image_url %}
+                            <img src="{{ listing.primary_image_url }}" alt="{{ listing.title }}" loading="lazy">
+                        {% else %}
+                            <div class="d-flex h-100 align-items-center justify-content-center bg-light text-muted">
+                                <i class="bi bi-tshirt fs-1"></i>
+                            </div>
+                        {% endif %}
+
+                        <!-- Transaction Badge -->
+                        <div class="position-absolute top-0 start-0 m-2">
+                            {% if listing.listing_type == 'sell' %}
+                                <span class="badge-transaction badge-sell">Buy</span>
+                            {% elif listing.listing_type == 'rent' %}
+                                <span class="badge-transaction badge-rent">Rent</span>
+                            {% elif listing.listing_type == 'resell' %}
+                                <span class="badge-transaction badge-resell">Resell</span>
+                            {% else %}
+                                <span class="badge-transaction badge-swap">Swap</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Eco Grade Badge -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge-eco-grade">♻ {{ listing.sustainability_grade }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body-content">
+                        <div>
+                            <div class="text-muted small mb-1">{{ listing.get_category_display }} • {{ listing.brand|default:"Pre-loved" }}</div>
+                            <h6 class="fw-bold text-truncate mb-2" title="{{ listing.title }}">
+                                <a href="{% url 'listing_detail' listing.id %}" class="text-dark text-decoration-none">{{ listing.title }}</a>
+                            </h6>
+                            <div class="small text-muted mb-2">Size: <span class="fw-semibold text-dark">{{ listing.size }}</span> | {{ listing.get_condition_display }}</div>
+                        </div>
+
+                        <div>
+                            <!-- Price Display -->
+                            <div class="d-flex align-items-baseline justify-content-between mb-2">
+                                <div class="fs-5 fw-bold text-dark">
+                                    {% if listing.listing_type == 'rent' %}
+                                        ₹{{ listing.rental_price_per_day }}<small class="text-muted fs-6">/day</small>
+                                    {% elif listing.listing_type == 'swap' %}
+                                        <span class="text-success fs-6"><i class="bi bi-arrow-left-right"></i> Swap Available</span>
+                                    {% else %}
+                                        ₹{{ listing.sale_price }}
+                                        {% if listing.original_price %}
+                                            <small class="text-muted text-decoration-line-through fs-6 ms-1">₹{{ listing.original_price }}</small>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Eco Impact Ribbon -->
+                            <div class="eco-impact-bar">
+                                <i class="bi bi-leaf-fill"></i> Saves {{ listing.co2_saved_kg }}kg CO₂
+                            </div>
+
+                            <!-- Detail CTA -->
+                            <a href="{% url 'listing_detail' listing.id %}" class="btn btn-rewear-outline btn-sm w-100 mt-2">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-bag-x display-4 text-muted"></i>
+                <h4 class="mt-3">No active listings available right now.</h4>
+                <p class="text-muted">Be the first to upload a garment to our circular fashion community!</p>
+                <a href="{% url 'add_listing' %}" class="btn btn-rewear-primary mt-2">+ List a Garment</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Values Banner -->
+<section class="bg-light py-5 border-top">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <div class="p-3">
+                    <i class="bi bi-arrow-repeat display-5 text-success mb-2" style="color:#059669;"></i>
+                    <h5 class="fw-bold">Circular Lifecycle</h5>
+                    <p class="small text-muted mb-0">Extend garment lifespans by buying, renting, reselling, or swapping items.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3">
+                    <i class="bi bi-cpu display-5 text-success mb-2" style="color:#059669;"></i>
+                    <h5 class="fw-bold">AI Eco Estimator</h5>
+                    <p class="small text-muted mb-0">Automatic calculation of water savings, CO2 reduction, and smart pricing.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3">
+                    <i class="bi bi-shield-check display-5 text-success mb-2" style="color:#059669;"></i>
+                    <h5 class="fw-bold">Verified Quality</h5>
+                    <p class="small text-muted mb-0">Transparent condition notes, dry-cleaned standards, and buyer protection.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3">
+                    <i class="bi bi-wallet2 display-5 text-success mb-2" style="color:#059669;"></i>
+                    <h5 class="fw-bold">Affordable Luxury</h5>
+                    <p class="small text-muted mb-0">Enjoy premium fashion brands at up to 80% off retail pricing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Marketplace | ReWear Circular Fashion{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Circular Fashion Marketplace</h2>
+            <p class="text-muted mb-0">Discover pre-loved pieces, rental outfits, and garment swap opportunities.</p>
+        </div>
+        <a href="{% url 'add_listing' %}" class="btn btn-rewear-primary rounded-pill">
+            <i class="bi bi-plus-circle me-1"></i> List New Item
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar Filter Form -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <h5 class="fw-bold mb-3"><i class="bi bi-funnel me-2 text-success"></i> Filter Products</h5>
+                <form method="GET" action="{% url 'catalog' %}">
+                    <!-- Search query -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Keyword</label>
+                        <input type="text" name="q" value="{{ search_query }}" class="form-control form-control-sm rounded-3" placeholder="Brand, item title...">
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Category</label>
+                        <select name="category" class="form-select form-select-sm rounded-3">
+                            <option value="">All Categories</option>
+                            {% for key, val in categories %}
+                                <option value="{{ key }}" {% if selected_category == key %}selected{% endif %}>{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Transaction Type -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Transaction Type</label>
+                        <select name="type" class="form-select form-select-sm rounded-3">
+                            <option value="">All Types (Buy, Rent, Swap)</option>
+                            {% for key, val in listing_types %}
+                                <option value="{{ key }}" {% if selected_type == key %}selected{% endif %}>{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Condition -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Condition</label>
+                        <select name="condition" class="form-select form-select-sm rounded-3">
+                            <option value="">All Conditions</option>
+                            {% for key, val in conditions %}
+                                <option value="{{ key }}" {% if selected_condition == key %}selected{% endif %}>{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Price Range -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Max Price (₹)</label>
+                        <input type="number" name="max_price" value="{{ request.GET.max_price }}" class="form-control form-control-sm rounded-3" placeholder="e.g. 2000">
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-rewear-primary btn-sm rounded-pill">Apply Filters</button>
+                        <a href="{% url 'catalog' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Clear All</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Catalog Product Grid -->
+        <div class="col-lg-9">
+            <!-- Active Filter Indicators -->
+            {% if search_query or selected_category or selected_type or selected_condition %}
+                <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+                    <span class="small text-muted">Active Filters:</span>
+                    {% if search_query %}<span class="badge bg-light text-dark border">Query: "{{ search_query }}"</span>{% endif %}
+                    {% if selected_category %}<span class="badge bg-light text-dark border">Category: {{ selected_category }}</span>{% endif %}
+                    {% if selected_type %}<span class="badge bg-light text-dark border">Type: {{ selected_type }}</span>{% endif %}
+                    {% if selected_condition %}<span class="badge bg-light text-dark border">Condition: {{ selected_condition }}</span>{% endif %}
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
+                {% for listing in listings %}
+                    <div class="col-6 col-md-4">
+                        <div class="rewear-card">
+                            <div class="card-img-wrapper">
+                                {% if listing.primary_image_url %}
+                                    <img src="{{ listing.primary_image_url }}" alt="{{ listing.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="d-flex h-100 align-items-center justify-content-center bg-light text-muted">
+                                        <i class="bi bi-tshirt fs-1"></i>
+                                    </div>
+                                {% endif %}
+
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    {% if listing.listing_type == 'sell' %}
+                                        <span class="badge-transaction badge-sell">Buy</span>
+                                    {% elif listing.listing_type == 'rent' %}
+                                        <span class="badge-transaction badge-rent">Rent</span>
+                                    {% elif listing.listing_type == 'resell' %}
+                                        <span class="badge-transaction badge-resell">Resell</span>
+                                    {% else %}
+                                        <span class="badge-transaction badge-swap">Swap</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge-eco-grade">♻ {{ listing.sustainability_grade }}</span>
+                                </div>
+                            </div>
+
+                            <div class="card-body-content">
+                                <div>
+                                    <div class="text-muted small mb-1">{{ listing.get_category_display }} • {{ listing.brand|default:"Pre-loved" }}</div>
+                                    <h6 class="fw-bold text-truncate mb-2" title="{{ listing.title }}">
+                                        <a href="{% url 'listing_detail' listing.id %}" class="text-dark text-decoration-none">{{ listing.title }}</a>
+                                    </h6>
+                                    <div class="small text-muted mb-2">Size: <span class="fw-semibold text-dark">{{ listing.size }}</span></div>
+                                </div>
+
+                                <div>
+                                    <div class="fs-5 fw-bold text-dark mb-2">
+                                        {% if listing.listing_type == 'rent' %}
+                                            ₹{{ listing.rental_price_per_day }}<small class="text-muted fs-6">/day</small>
+                                        {% elif listing.listing_type == 'swap' %}
+                                            <span class="text-success fs-6"><i class="bi bi-arrow-left-right"></i> Swap Available</span>
+                                        {% else %}
+                                            ₹{{ listing.sale_price }}
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="eco-impact-bar">
+                                        <i class="bi bi-leaf-fill"></i> Saves {{ listing.co2_saved_kg }}kg CO₂
+                                    </div>
+
+                                    <a href="{% url 'listing_detail' listing.id %}" class="btn btn-rewear-outline btn-sm w-100 mt-2">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
+                        <i class="bi bi-search display-4 text-muted"></i>
+                        <h4 class="mt-3">No matching items found</h4>
+                        <p class="text-muted">Try adjusting your category or price filters.</p>
+                        <a href="{% url 'catalog' %}" class="btn btn-rewear-primary btn-sm rounded-pill">Reset Filters</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

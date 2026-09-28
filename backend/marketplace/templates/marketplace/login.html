@@ -1,0 +1,10 @@
+<h1>Log in to ReWear</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Log in</button>
+</form>
+
+<p>New to ReWear? <a href="{% url 'signup' %}">Create an account</a></p>

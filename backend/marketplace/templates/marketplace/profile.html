@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | ReWear Circular Fashion{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+        <!-- Profile Summary Card -->
+        <div class="col-lg-4">
+            <div class="bg-white p-4 rounded-4 shadow-sm border text-center">
+                <div class="position-relative d-inline-block mb-3">
+                    {% if profile.profile_image %}
+                        <img src="{{ profile.profile_image.url }}" alt="{{ user.username }}" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-emerald text-white d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px; background:#059669; font-size: 3rem;">
+                            <i class="bi bi-person"></i>
+                        </div>
+                    {% endif %}
+                    <span class="position-absolute bottom-0 end-0 badge bg-success p-2 rounded-circle" style="background:#10b981 !important;">
+                        <i class="bi bi-check-lg text-white"></i>
+                    </span>
+                </div>
+
+                <h4 class="fw-bold mb-1">{{ user.first_name }} {{ user.last_name }}</h4>
+                <p class="text-muted small mb-2">@{{ user.username }} • Joined Circular Marketplace</p>
+                <span class="badge bg-emerald text-white px-3 py-2 rounded-pill mb-3" style="background:#059669;">
+                    🌱 {{ profile.eco_level }} ({{ profile.sustainability_points }} Eco Points)
+                </span>
+
+                <p class="small text-muted mb-4">{{ profile.bio|default:"No bio added yet. Add details about your closet and style!" }}</p>
+
+                <a href="{% url 'edit_profile' %}" class="btn btn-rewear-outline btn-sm rounded-pill w-100 mb-2">
+                    <i class="bi bi-pencil me-1"></i> Edit Profile
+                </a>
+                <a href="{% url 'seller_dashboard' %}" class="btn btn-rewear-primary btn-sm rounded-pill w-100">
+                    <i class="bi bi-speedometer2 me-1"></i> Seller Dashboard
+                </a>
+            </div>
+
+            <!-- Eco Impact Card -->
+            <div class="bg-emerald text-white p-4 rounded-4 shadow-sm mt-4" style="background: linear-gradient(135deg, #059669, #10b981);">
+                <h5 class="fw-bold mb-3"><i class="bi bi-tree-fill me-2"></i> Your Lifetime Impact</h5>
+                <div class="d-flex justify-content-between border-bottom border-white border-opacity-25 pb-2 mb-2">
+                    <span>CO₂ Prevented</span>
+                    <span class="fw-bold">{{ total_co2 }} kg</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Listings Created</span>
+                    <span class="fw-bold">{{ listings.count }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Active Listings & Orders -->
+        <div class="col-lg-8">
+            <ul class="nav nav-pills mb-4" id="profileTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-4" id="listings-tab" data-bs-toggle="tab" data-bs-target="#listingsTab" type="button" role="tab">My Listings ({{ listings.count }})</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill px-4" id="orders-tab" data-bs-toggle="tab" data-bs-target="#ordersTab" type="button" role="tab">Order History ({{ orders.count }})</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="profileTabsContent">
+                <!-- My Listings Tab -->
+                <div class="tab-pane fade show active" id="listingsTab" role="tabpanel">
+                    <div class="row g-3">
+                        {% for listing in listings %}
+                            <div class="col-md-6">
+                                <div class="bg-white p-3 rounded-4 shadow-sm border d-flex gap-3 align-items-center">
+                                    <div style="width:70px; height:70px; flex-shrink:0;">
+                                        {% if listing.primary_image_url %}
+                                            <img src="{{ listing.primary_image_url }}" alt="{{ listing.title }}" class="rounded-3 w-100 h-100" style="object-fit:cover;">
+                                        {% else %}
+                                            <div class="w-100 h-100 bg-light rounded-3 d-flex align-items-center justify-content-center text-muted">
+                                                <i class="bi bi-tshirt"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <h6 class="fw-bold text-truncate mb-1">
+                                            <a href="{% url 'listing_detail' listing.id %}" class="text-dark text-decoration-none">{{ listing.title }}</a>
+                                        </h6>
+                                        <small class="text-muted d-block">{{ listing.get_listing_type_display }} • Size {{ listing.size }}</small>
+                                        <span class="badge {% if listing.is_available %}bg-success{% else %}bg-secondary{% endif %} mt-1">
+                                            {% if listing.is_available %}Active{% else %}Sold / Rented{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12 text-center py-4 bg-white rounded-4 border">
+                                <p class="text-muted mb-0">You haven't listed any garments yet.</p>
+                                <a href="{% url 'add_listing' %}" class="btn btn-rewear-primary btn-sm rounded-pill mt-2">+ List Your First Garment</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Orders Tab -->
+                <div class="tab-pane fade" id="ordersTab" role="tabpanel">
+                    <div class="bg-white p-4 rounded-4 shadow-sm border">
+                        {% for order in orders %}
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-1">Order #{{ order.id }} - {{ order.listing.title }}</h6>
+                                    <small class="text-muted">Ordered on {{ order.ordered_at|date:"M d, Y" }} • Type: {{ order.get_transaction_type_display }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-dark">₹{{ order.total_price }}</div>
+                                    <span class="badge bg-success">{{ order.get_status_display }}</span>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted text-center my-3">No orders placed yet. Explore the marketplace to buy, rent, or swap!</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

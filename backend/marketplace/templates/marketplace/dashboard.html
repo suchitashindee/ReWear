@@ -1,0 +1,22 @@
+<h1>My ReWear Profile</h1>
+
+<p>Welcome, {{ user.first_name|default:user.username }}!</p>
+
+<p>
+    <a href="{% url 'create_listing' %}">+ Add a new item</a> |
+    <a href="{% url 'home' %}">View marketplace</a> |
+    <a href="{% url 'logout' %}">Log out</a>
+</p>
+
+<h2>My Listings</h2>
+
+{% for listing in my_listings %}
+    <div>
+        <h3>{{ listing.title }}</h3>
+        <p>{{ listing.get_listing_type_display }} · {{ listing.get_condition_display }}</p>
+        <p>Available: {{ listing.is_available }}</p>
+    </div>
+    <hr>
+{% empty %}
+    <p>You have not listed any clothing yet.</p>
+{% endfor %}

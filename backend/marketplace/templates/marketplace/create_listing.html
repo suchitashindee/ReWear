@@ -1,0 +1,10 @@
+<h1>List an item on ReWear</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Publish listing</button>
+</form>
+
+<p><a href="{% url 'dashboard' %}">Back to my profile</a></p>

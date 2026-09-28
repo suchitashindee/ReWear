@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}List a Pre-Loved Garment | ReWear{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-emerald text-white rounded-3 p-3 d-inline-flex" style="background:#059669;">
+                        <i class="bi bi-plus-circle fs-3"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">List a Pre-Loved Garment</h3>
+                        <p class="text-muted mb-0">Upload details & photos to enable buying, renting, reselling, or swapping.</p>
+                    </div>
+                </div>
+
+                <!-- AI Smart Tagging & Pricing Assistant Box -->
+                <div class="ai-assistant-card mb-4" id="aiAssistantBox">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-robot"></i> AI Sustainability & Valuation Assistant</h5>
+                        <span class="badge bg-success" id="aiGradeBadge">♻ Eco Grade: A+</span>
+                    </div>
+                    <p class="small text-muted mt-2 mb-2" id="aiTipText">Select garment category and condition to calculate real-time carbon footprint reduction.</p>
+                    <div class="d-flex gap-3 small text-dark fw-bold">
+                        <span>🌱 Estimated CO₂ Saved: <strong id="aiCo2Val">6.5 kg</strong></span>
+                        <span>💧 Water Conserved: <strong id="aiWaterVal">2700 L</strong></span>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <!-- Title -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Listing Title *</label>
+                            {{ form.title }}
+                        </div>
+
+                        <!-- Category & Type -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Category *</label>
+                            {{ form.category }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Transaction Type *</label>
+                            {{ form.listing_type }}
+                        </div>
+
+                        <!-- Brand & Size -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Brand / Designer</label>
+                            {{ form.brand }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Size *</label>
+                            {{ form.size }}
+                        </div>
+
+                        <!-- Condition -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Condition *</label>
+                            {{ form.condition }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Primary Cover Image *</label>
+                            {{ form.image }}
+                        </div>
+
+                        <!-- Multiple Photos Upload -->
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <label class="form-label fw-bold"><i class="bi bi-images me-1"></i> Upload Multiple Gallery Photos</label>
+                                <input type="file" name="extra_images" multiple class="form-control" accept="image/*">
+                                <small class="text-muted">Tip: Add front view, back view, care tag, and close-up fabric photos for faster sales!</small>
+                            </div>
+                        </div>
+
+                        <!-- Pricing Section -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Sale / Resell Price (₹)</label>
+                            {{ form.sale_price }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Original Retail Price (₹)</label>
+                            {{ form.original_price }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Rental Price Per Day (₹)</label>
+                            {{ form.rental_price_per_day }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Rental Security Deposit (₹)</label>
+                            {{ form.security_deposit }}
+                        </div>
+
+                        <!-- Swap preferences -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Swap Preferences (If listing for Swap)</label>
+                            {{ form.swap_preferences }}
+                        </div>
+
+                        <!-- Description & Condition Details -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description *</label>
+                            {{ form.description }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Care & Wash Details</label>
+                            {{ form.condition_details }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-rewear-primary btn-lg rounded-pill">
+                            <i class="bi bi-cloud-arrow-up me-2"></i> Publish Garment Listing (+50 Eco Points)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.querySelector('select[name="category"]');
+    const conditionSelect = document.querySelector('select[name="condition"]');
+    const brandInput = document.querySelector('input[name="brand"]');
+
+    function updateAiStats() {
+        const cat = categorySelect ? categorySelect.value : 'women';
+        const cond = conditionSelect ? conditionSelect.value : 'like_new';
+        const brand = brandInput ? brandInput.value : '';
+
+        fetch(`/api/ai-tag-assistant/?category=${cat}&condition=${cond}&brand=${encodeURIComponent(brand)}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('aiCo2Val').innerText = data.co2_saved + ' kg';
+                document.getElementById('aiWaterVal').innerText = data.water_saved + ' L';
+                document.getElementById('aiGradeBadge').innerText = '♻ Eco Grade: ' + data.grade;
+                document.getElementById('aiTipText').innerText = data.smart_tip;
+            });
+    }
+
+    if(categorySelect) categorySelect.addEventListener('change', updateAiStats);
+    if(conditionSelect) conditionSelect.addEventListener('change', updateAiStats);
+    if(brandInput) brandInput.addEventListener('input', updateAiStats);
+});
+</script>
+{% endblock %}

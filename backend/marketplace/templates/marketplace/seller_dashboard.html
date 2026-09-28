@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Seller Dashboard | ReWear Circular Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Seller Dashboard</h2>
+            <p class="text-muted mb-0">Track performance, manage listings, and view circular earnings.</p>
+        </div>
+        <a href="{% url 'add_listing' %}" class="btn btn-rewear-primary rounded-pill">
+            <i class="bi bi-plus-circle me-1"></i> List New Garment
+        </a>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="bg-white p-3 rounded-4 shadow-sm border d-flex align-items-center gap-3">
+                <div class="bg-emerald text-white rounded-3 p-3" style="background:#059669;">
+                    <i class="bi bi-tags fs-3"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ listings.count }}</h3>
+                    <small class="text-muted">Total Listings</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-white p-3 rounded-4 shadow-sm border d-flex align-items-center gap-3">
+                <div class="bg-success text-white rounded-3 p-3" style="background:#10b981;">
+                    <i class="bi bi-check2-circle fs-3"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ active_count }}</h3>
+                    <small class="text-muted">Active Listings</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-white p-3 rounded-4 shadow-sm border d-flex align-items-center gap-3">
+                <div class="bg-primary text-white rounded-3 p-3">
+                    <i class="bi bi-box-seam fs-3"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ sold_count }}</h3>
+                    <small class="text-muted">Sold / Rented Items</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listings Management Table -->
+    <div class="bg-white rounded-4 shadow-sm border p-4">
+        <h5 class="fw-bold mb-3">Your Closet Inventory</h5>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item</th>
+                        <th>Type</th>
+                        <th>Price / Rate</th>
+                        <th>CO₂ Savings</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in listings %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.primary_image_url %}
+                                        <img src="{{ item.primary_image_url }}" alt="{{ item.title }}" class="rounded-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center text-muted" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-tshirt"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-truncate" style="max-width:200px;">{{ item.title }}</h6>
+                                        <small class="text-muted">{{ item.get_category_display }} • {{ item.size }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if item.listing_type == 'sell' %}
+                                    <span class="badge-transaction badge-sell">Buy/Sell</span>
+                                {% elif item.listing_type == 'rent' %}
+                                    <span class="badge-transaction badge-rent">Rent</span>
+                                {% elif item.listing_type == 'resell' %}
+                                    <span class="badge-transaction badge-resell">Resell</span>
+                                {% else %}
+                                    <span class="badge-transaction badge-swap">Swap</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="fw-bold">
+                                    {% if item.listing_type == 'rent' %}
+                                        ₹{{ item.rental_price_per_day }}/day
+                                    {% elif item.listing_type == 'swap' %}
+                                        Swap
+                                    {% else %}
+                                        ₹{{ item.sale_price }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td><span class="badge bg-light text-success border">🌱 {{ item.co2_saved_kg }}kg</span></td>
+                            <td>
+                                {% if item.is_available %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Sold / Rented</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'listing_detail' item.id %}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">You haven't listed any items in your closet yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

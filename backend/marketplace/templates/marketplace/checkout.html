@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout | ReWear Circular Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-1">Checkout & Delivery Details</h2>
+    <p class="text-muted mb-4">Provide delivery destination & contact info for your circular fashion items.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- Left Column: Delivery Form -->
+            <div class="col-lg-7">
+                <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt text-success me-2"></i> Shipping Address</h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Full Name *</label>
+                            {{ address_form.full_name }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Phone Number *</label>
+                            {{ address_form.phone }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email Address *</label>
+                            {{ address_form.email }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Alternate Phone</label>
+                            {{ address_form.alternate_phone }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">House Address / Street *</label>
+                            {{ address_form.house_address }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Landmark</label>
+                            {{ address_form.landmark }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Pincode *</label>
+                            {{ address_form.pincode }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">City *</label>
+                            {{ address_form.city }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">State *</label>
+                            {{ address_form.state }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Order Items & Payment Simulation -->
+            <div class="col-lg-5">
+                <div class="bg-white p-4 rounded-4 shadow-sm border mb-4">
+                    <h5 class="fw-bold mb-3">Order Items ({{ cart_items.count }})</h5>
+
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in cart_items %}
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-truncate" style="max-width:220px;">{{ item.listing.title }}</h6>
+                                    <small class="text-muted">{{ item.get_transaction_type_display }} • Size {{ item.listing.size }}</small>
+                                </div>
+                                <span class="fw-bold">₹{{ item.calculated_price }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Garments Subtotal</span>
+                        <span class="fw-bold">₹{{ total }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 text-success">
+                        <span>🌱 CO₂ Offset ({{ co2_total }}kg)</span>
+                        <span>Included</span>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between fs-4 fw-bold text-dark mb-4">
+                        <span>Total Payable</span>
+                        <span>₹{{ total }}</span>
+                    </div>
+
+                    <!-- Payment Mode Selection -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Select Payment Mode</label>
+                        <div class="form-check p-3 rounded-3 border bg-light mb-2">
+                            <input class="form-check-input" type="radio" name="payment_mode" id="cod" checked>
+                            <label class="form-check-label fw-bold" for="cod">
+                                <i class="bi bi-cash-stack me-1 text-success"></i> Cash on Delivery / Pay on Swap
+                            </label>
+                            <small class="d-block text-muted">Pay securely upon inspect & delivery</small>
+                        </div>
+                        <div class="form-check p-3 rounded-3 border bg-light">
+                            <input class="form-check-input" type="radio" name="payment_mode" id="upi">
+                            <label class="form-check-label fw-bold" for="upi">
+                                <i class="bi bi-qr-code-scan me-1 text-primary"></i> Instant UPI / Wallet
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-rewear-primary btn-lg rounded-pill w-100">
+                        <i class="bi bi-check-circle me-1"></i> Place Circular Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

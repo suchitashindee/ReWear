@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up | ReWear Circular Marketplace{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border text-center">
+                <div class="rewear-brand justify-content-center mb-3 text-dark">
+                    <span class="eco-icon me-2"><i class="bi bi-recycle"></i></span>
+                    <span class="text-dark">ReWear</span>
+                </div>
+                <h4 class="fw-bold mb-1">Join the Circular Fashion Community</h4>
+                <p class="text-muted small mb-4">One account to buy, sell, rent, resell, and swap pre-loved clothing.</p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="text-start">
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-rewear-primary btn-lg rounded-pill">Create Account (+100 Eco Points)</button>
+                    </div>
+                </form>
+
+                <p class="small text-muted mt-4 mb-0">
+                    Already have an account? <a href="{% url 'login' %}" class="text-success fw-bold text-decoration-none">Log In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
